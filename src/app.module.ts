@@ -3,6 +3,7 @@ import { UsersModule } from "./users/users.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "./users/entities/user.entity";
 import { Task } from "./task/entities/task.entity";
+import { TaskModule } from "./task/task.module";
 
 @Module({
   imports: [
@@ -14,10 +15,11 @@ import { Task } from "./task/entities/task.entity";
       password: "12345678",
       database: "nextauth",
       autoLoadEntities: true,
-      entities: [User, Task],
+      entities: [__dirname + "/**/*.entity{.ts,.js}"],
       synchronize: true,
     }),
     UsersModule,
+    TaskModule,
   ],
 })
 export class AppModule {}
