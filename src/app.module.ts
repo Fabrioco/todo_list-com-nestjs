@@ -1,3 +1,4 @@
+import { ConfigModule } from "@nestjs/config";
 import { Module } from "@nestjs/common";
 import { UsersModule } from "./users/users.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
@@ -7,16 +8,25 @@ import { TaskModule } from "./task/task.module";
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: "postgres",
-      host: "localhost",
-      port: 5432,
-      username: "postgres",
-      password: "12345678",
-      database: "nextauth",
-      autoLoadEntities: true,
-      entities: [__dirname + "/**/*.entity{.ts,.js}"],
-      synchronize: true,
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRootAsync({
+      useFactory: () => ({
+        type: "postgres",
+        url: process.env.DATABASE_URL,
+        entities: [__dirname + "/**/*.entity{.ts,.js}"],
+        synchronize: false, // IMPORTANTE: false em produção
+        autoLoadEntities: true,
+        ssl:
+          process.env.NODE_ENV === "production"
+            ? {
+                rejectUnauthorized: false,
+              }
+            : false,
+        migrations: [__dirname + "/migrations/*{.ts,.js}"],
+        cli: {
+          migrationsDir: "src/migrations",
+        },
+      }),
     }),
     UsersModule,
     TaskModule,
