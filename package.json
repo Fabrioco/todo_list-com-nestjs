@@ -1,12 +1,13 @@
 {
   "name": "todo_list",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "API NestJS com PostgreSQL",
+  "author": "Seu Nome",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "prebuild": "rimraf dist",
+    "build": "tsc -p tsconfig.build.json",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -18,10 +19,15 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "postbuild": "cp -r src/migrations dist/ && cp ormconfig.js dist/"
+    "postbuild": "cp -r src/migrations dist/ && cp ormconfig.js dist/",
+    "typeorm": "ts-node ./node_modules/typeorm/cli",
+    "migrate:prod": "npm run build && npm run typeorm migration:run -- -d dist/data-source.js",
+    "postbuild": "cp -r src/migrations dist/ && cp data-source.ts dist/"
   },
   "dependencies": {
+    "@nestjs/cli": "^11.0.0",
     "@nestjs/common": "^11.0.1",
+    "@nestjs/config": "^4.0.2",
     "@nestjs/core": "^11.0.1",
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/mapped-types": "*",
@@ -31,13 +37,13 @@
     "bcrypt": "^5.1.1",
     "pg": "^8.14.1",
     "reflect-metadata": "^0.2.2",
+    "rimraf": "^5.0.5",
     "rxjs": "^7.8.1",
     "typeorm": "^0.3.22"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.2.0",
     "@eslint/js": "^9.18.0",
-    "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
     "@nestjs/testing": "^11.0.1",
     "@swc/cli": "^0.6.0",
@@ -77,5 +83,9 @@
     ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }
