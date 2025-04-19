@@ -1,35 +1,29 @@
-import { ConfigModule } from "@nestjs/config";
+// src/app.module.ts
 import { Module } from "@nestjs/common";
-import { UsersModule } from "./users/users.module";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { User } from "./users/entities/user.entity";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { Task } from "./task/entities/task.entity";
-import { TaskModule } from "./task/task.module";
+import { User } from "./users/entities/user.entity";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
+    ConfigModule.forRoot(),
     TypeOrmModule.forRootAsync({
-      useFactory: () => ({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
         type: "postgres",
-        url: process.env.DATABASE_URL,
-        entities: [__dirname + "/**/*.entity{.ts,.js}"],
-        synchronize: false, // IMPORTANTE: false em produção
-        autoLoadEntities: true,
-        ssl:
-          process.env.NODE_ENV === "production"
-            ? {
-                rejectUnauthorized: false,
-              }
-            : false,
-        migrations: [__dirname + "/migrations/*{.ts,.js}"],
-        cli: {
-          migrationsDir: "src/migrations",
+        url: configService.get("DATABASE_URL"),
+        synchronize: false, // CUIDADO: desative em produção!
+        entities: [Task, User],
+        ssl: true,
+        extra: {
+          ssl: {
+            rejectUnauthorized: false,
+          },
         },
       }),
     }),
-    UsersModule,
-    TaskModule,
   ],
 })
 export class AppModule {}
